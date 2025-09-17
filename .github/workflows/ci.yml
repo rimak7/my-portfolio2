@@ -23,5 +23,6 @@ jobs:
     
       - name: push image
         run: |
-          docker login -u rimakanm -p ${{secret.REGISTRY_PASS}}
-          docker push rimakanm/portfolio2
+
+              docker login -u rimakanm -p ${{secrets.REGISTRY_PASS}}
+              docker push rimakanm/portfolio2
