@@ -7,8 +7,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
-
+    
 jobs:
  
   build:
@@ -29,17 +28,17 @@ jobs:
               docker push ${{secrets.REGISTRY_USER}}/portfolio2:${{github.run_number}}
                docker push ${{secrets.REGISTRY_USER}}/portfolio2 
 
- deploy:
-  needs: build
-  run-on: ubuntu-latest
-  steps:
-  - name: SSH to a server
-    uses: appleboy/ssh-action@v1
-    with:
-    host: ${{ secrets.HOST }}
-    username: ${{ secrets.USERNAME }}
-    key: ${{ secrets.KEY }}
-    #port: ${{ secrets.PORT }}
-    script: |
-     docker rm -f myresume
-     docker run -d --name myresume -p 8080:5001 ${{secrets.REGISTRY_USER}}/portfolio2:${{github.run_number}}
+deploy:
+   needs: build
+   runs-on: ubuntu-latest
+   steps:
+      - name: SSH to a server
+  uses: appleboy/ssh-action@v1
+  with:
+      host: ${{ secrets.HOST }}
+      username: ${{ secrets.USERNAME }}
+      key: ${{ secrets.KEY }}
+      #port: ${{ secrets.PORT }}
+      script: |
+        docker rm -f myresume
+        docker run -d --name myresume -p 8080:5001 ${{secrets.REGISTRY_USER}}/portfolio2:${{github.run_number}}
