@@ -56,4 +56,4 @@ jobs:
       - name: Upload to S3 bucket
         run: |
           echo "Uploading files to S3..."
-          aws s3 sync . "s3://ci-cd-for-s3/my-app" --delete
+          aws s3 sync . "s3://my-app/ci-cd-for-s3/" --delete
