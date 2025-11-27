@@ -1,4 +1,4 @@
-name: Real world Docker build and push
+name: Real world Docker build and push on s3
 
 on:
   push:
