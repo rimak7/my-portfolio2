@@ -13,6 +13,7 @@ permissions:
 env:
   PYTHON_VERSION: "3.11"
   AWS_REGION: ${{ secrets.AWS_REGION }}
+  S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
 
 jobs:
   build:
@@ -37,7 +38,6 @@ jobs:
             echo "No requirements.txt found, only pytest installed"
           fi
 
-      # This will NOT fail the job if there are no tests (exit code 5)
       - name: Unit tests
         continue-on-error: true
         run: |
@@ -52,3 +52,8 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload to S3 bucket
+        run: |
+          echo "Uploading files to S3..."
+          aws s3 sync . "s3://ci-cd-for-s3/" --delete
