@@ -54,6 +54,8 @@ jobs:
   push_to_ecr:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      
       - name: push to ECR
         uses: your-org/aws-oidc-action@v1
         with:
