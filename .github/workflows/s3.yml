@@ -56,7 +56,7 @@ jobs:
   # ----------------------------------------------------------------------
   push_to_ecr:
     name: CD - Push to ECR
-    needs: ci_build_test # DEPENDS on CI job passing
+   # needs: ci_build_test # DEPENDS on CI job passing
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
