@@ -50,3 +50,18 @@ jobs:
         run: |
          echo "Uploading files to S3..."
          aws s3 sync . "s3://ci-cd-for-s3/" --delete
+
+  push_to_ecr:
+    runs_on: ubuntu-latest
+     steps:
+      - name: push to ECR
+        uses: your-org/aws-oidc-action@v1
+        with:
+          enable_ecr_login: true
+          ecr_registry: 123456789012.dkr.ecr.us-east-1.amazonaws.com
+      
+      - name: Build and push Docker image
+        run: |
+          docker build -t my-app .
+          docker tag my-app:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
+          docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
