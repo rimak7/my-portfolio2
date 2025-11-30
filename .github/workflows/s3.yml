@@ -35,8 +35,8 @@ jobs:
             python -m pip install pytest
       - name: Unit tests
         run: |
-         echo "Running pytest..."
-         python -m pytest
+          pip install pytest
+          pytest
       - name: Build Docker image
         run: docker build -t rimak7/my-portfolio2 .
 
