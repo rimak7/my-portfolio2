@@ -45,7 +45,7 @@ jobs:
         run: docker save ${{ env.ECR_REPOSITORY }}:latest -o my-app.tar
 
       - name: Upload Docker image artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: docker-image
           path: my-app.tar
