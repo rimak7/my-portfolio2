@@ -35,16 +35,11 @@ jobs:
          python -m pip install --upgrade pip
          python -m pip install -r requirements.txt
          python -m pip install pytest
-      
-      # ⬇️ ADD THIS STEP ⬇️
-      - name: List files for debugging
-        run: ls -R
-      # ⬆️ ADD THIS STEP ⬆️
-        
+    
       - name: Unit tests
-        run: 
-          pytest
-
+        run: |
+           echo "Running pytest..."
+           python -m pytest
       - name: Build Docker image
         run: docker build -t rimak7/my-portfolio2 .
 
