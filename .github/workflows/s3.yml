@@ -52,8 +52,8 @@ jobs:
          aws s3 sync . "s3://ci-cd-for-s3/" --delete
 
   push_to_ecr:
-    runs_on: ubuntu-latest
-     steps:
+    runs-on: ubuntu-latest
+    steps:
       - name: push to ECR
         uses: your-org/aws-oidc-action@v1
         with:
