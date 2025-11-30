@@ -33,11 +33,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest # Install pytest
           pip install -r requirements.txt
-        # If you have a requirements.txt file, you can also install other dependencies:
-        # pip install -r requirements.txt
-
+          
       - name: Run tests with pytest
-        run: pytest test_app.py
+        run: pytest app.py
 
       - name: Build Docker image
         run: docker build -t rimak7/my-portfolio2 .
