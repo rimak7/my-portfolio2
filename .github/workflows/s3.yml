@@ -1,4 +1,4 @@
-name: push on s3
+name: Training cic
 
 on:
   push:
@@ -36,85 +36,8 @@ jobs:
           
       - name: Run tests with pytest
         run: pytest test_app.py
-
-      - name: Build Docker image
-        run: docker build -t  my-training-ecr .
-
-      - name: Save Docker image as artifact
-        # This saves the built image layer locally (as a tar file) so the CD job can use it
-        run: docker save ${{ env.ECR_REPOSITORY }}:latest -o my-app.tar
-
-      - name: Upload Docker image artifact
-        uses: actions/upload-artifact@v5
-        with:
-          name: docker-image
-          path: my-app.tar
-          retention-days: 1 # Keep artifacts for 1 day to save storage
-
-  # ----------------------------------------------------------------------
-  # 2. CONTINUOUS DEPLOYMENT (CD) JOB 1: Push to ECR
-  # ----------------------------------------------------------------------
-  push_to_ecr:
-    name: CD - Push to ECR
-   # needs: ci_build_test # DEPENDS on CI job passing
-    runs-on: ubuntu-latest
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          
-          
-      # The "Ensure ECR Repository Exists" step has been removed
-      # since you created the repository manually.
-          
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        env:
-            AWS_REGION: us-east-1
-
-      - name: Download Docker image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: docker-image
-          path: /tmp/
-
-      - name: Load Docker image
-        # Load the image tar file saved in the previous job
-        run: docker load -i /tmp/my-app.tar
-
-      - name: Push Docker image to ECR
-        run: |
-          # Retag the image for the ECR repository
-          docker tag ${{ env.ECR_REPOSITORY }}:latest ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
-          docker tag ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-          
-          # Push both tags (latest and SHA)
-          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
-          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-          
-  # ----------------------------------------------------------------------
-  # 3. CONTINUOUS DEPLOYMENT (CD) JOB 2: Upload to S3
-  # ----------------------------------------------------------------------
-  s3_sync:
-    name: CD - Sync S3 Bucket
-    # NOTE: This job runs in parallel with push_to_ecr, but still depends on the CI job
-    #needs: ci_build_test 
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        # We need to check out the code again to sync the static files (templates/index.html)
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials (for S3)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }} # Use the region from env
-
+        
       - name: Upload static files to S3 bucket
-        # Sync the entire repository contents to the S3 bucket
-        run: |
-          echo "Syncing static files to s3://${{ env.S3_BUCKET_NAME }}/"
+  
+        run: 
           aws s3 sync . s3://${{ env.S3_BUCKET_NAME }}/ --delete
