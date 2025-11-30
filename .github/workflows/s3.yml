@@ -100,7 +100,7 @@ jobs:
   s3_sync:
     name: CD - Sync S3 Bucket
     # NOTE: This job runs in parallel with push_to_ecr, but still depends on the CI job
-    needs: ci_build_test 
+    #needs: ci_build_test 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
