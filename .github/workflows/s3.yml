@@ -54,7 +54,7 @@ jobs:
         
       - name: Build, tag, and push image to ECR
         env:
-          ECR_REPOSITORY: your-ecr-repository-name # Define this as a separate ENV/Secret
+          ECR_REPOSITORY: ${{env.ECR_REPOSITORY}} # Define this as a separate ENV/Secret
         run: |
           REGISTRY=${{ steps.login-ecr.outputs.registry }}
           REPO=${{ env.ECR_REPOSITORY }}
