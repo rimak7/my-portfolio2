@@ -36,8 +36,14 @@ jobs:
           
       - name: Run tests with pytest
         run: pytest test_app.py
-        
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}  
+
       - name: Upload static files to S3 bucket
   
         run: 
-          aws s3 sync . s3://${{ env.S3_BUCKET_NAME }}/ --delete
+          aws s3 sync . s3://${{ env.S3_BUCKET }}/ --delete
