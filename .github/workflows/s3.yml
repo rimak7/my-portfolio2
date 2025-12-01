@@ -73,7 +73,7 @@ jobs:
           REPO="${{ env.ECR_REPOSITORY }}"
           TAG="${{ github.sha }}"
           
-          # Build with the commit SHA tag and tag again as 'latest'
+           # Build with the commit SHA tag and tag again as 'latest'
           docker build -t $REGISTRY/$REPO:$TAG .
           docker tag $REGISTRY/$REPO:$TAG $REGISTRY/$REPO:latest
 
@@ -103,14 +103,14 @@ jobs:
         with:
           role-to-assume: ${{secrets.AWS_OIDC_ROLE_ARN}}
           aws-region: ${{env.AWS_REGION}}
-
+     
       - name: Prepare the task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}  # e.g., task-definition.json
           container-name: ${{ env.CONTAINER_NAME }}
-          image_uri: ${{ steps.build-image.outputs.image }} 
+          image: ${{ needs.build.outputs.image_uri }}
 
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
@@ -120,3 +120,6 @@ jobs:
           cluster: ${{ env.CLUSTER_NAME }}
 
           wait-for-service-stability: "true"
+      - name: Debug - Check Image URI Value
+        run: |
+          echo " Image URI passed from build job: ${{ needs.build.outputs.image_uri }}""
