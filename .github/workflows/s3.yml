@@ -103,7 +103,9 @@ jobs:
         with:
           role-to-assume: ${{secrets.AWS_OIDC_ROLE_ARN}}
           aws-region: ${{env.AWS_REGION}}
-     
+      - name: Debug - Check Image URI Value
+        run: |
+           echo  Image URI passed from build job: ${{ needs.build.outputs.image_uri }}
       - name: Prepare the task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -119,7 +121,5 @@ jobs:
           service: ${{ env.SERVICE_NAME }}
           cluster: ${{ env.CLUSTER_NAME }}
 
-          wait-for-service-stability: "true"
-      - name: Debug - Check Image URI Value
-        run: |
-          echo " Image URI passed from build job: ${{ needs.build.outputs.image_uri }}""
+          wait-for-service-stability: " true"
+      
