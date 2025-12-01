@@ -103,8 +103,7 @@ jobs:
           
       # Debug step to confirm the input value
       - name: Debug - Check Image URI Value
-        run: | 
-         echo "Image URI from build job: ${{ needs.build.outputs.image_uri }}"
+        run: echo "Image URI from build job:${{ needs.build.outputs.image_uri }}"
           
       - name: Prepare the task definition
         id: task-def
