@@ -23,10 +23,10 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # FIX 1: Rely on the output of the dedicated build action
+    # FIX 1: Explicitly construct the full Image URI in the output declaration.
+    # This bypasses reliance on the 'build-and-push.outputs.image' if it's being corrupted.
     outputs:
-      # We will now use the direct output from the 'build-and-push' step for reliability
-      image_uri: ${{ steps.build-and-push.outputs.image }}
+      image_uri: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
 
     steps:
       - name: Checkout code
@@ -88,15 +88,10 @@ jobs:
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
-      
-      # REMOVED: The manual 'Build image' and 'Push image to ECR' steps, as they are redundant.
-      # REMOVED: The 'Set Image URI Output' step, as 'build-and-push.outputs.image' is simpler and more reliable.
 
   deploy:
     runs-on: ubuntu-latest
     needs: [build] 
-    
-    # REMOVED: The 'env: IMAGE_URI' block, returning to direct output use for clarity
     
     steps:
       # Configure AWS credentials again in the new job
@@ -106,13 +101,17 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }} 
           
+      # Debug step to confirm the input value
+      - name: Debug - Check Image URI Value
+        run: echo "Image URI from build job: ${{ needs.build.outputs.image_uri }}"
+          
       - name: Prepare the task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}
           container-name: ${{ env.CONTAINER_NAME }}
-          # FIX 2: Direct reference to the build job's output (single line, no complex ENV setup)
+          # FIX 2: Direct reference to the build job's output
           image: ${{ needs.build.outputs.image_uri }}
 
       - name: Deploy to ECS
