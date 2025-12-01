@@ -80,7 +80,7 @@ jobs:
 
 
       - name: Deploy to Amazon ECS Service
-        uses: aws-actions/amazon-ecs-deploy@v2
+        uses: aws-actions/amazon-ecs-deploy@v1
         with:
           task-definition: training-task.json # e.g., task-definition.json
           service: ${{ env.AWS_SERVICE_NAME}}
