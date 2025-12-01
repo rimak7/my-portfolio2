@@ -98,14 +98,14 @@ jobs:
         with:
           role-to-assume: ${{secrets.AWS_OIDC_ROLE_ARN}}
           aws-region: ${{env.AWS_REGION}}
-          
+
       - name: Prepare the task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}  # e.g., task-definition.json
           container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{  needs.build.outputs.image_uri }} 
+          image_uri: ${{ steps.build-and-push.outputs.image }} 
 
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
@@ -114,4 +114,4 @@ jobs:
           service: ${{ env.SERVICE_NAME }}
           cluster: ${{ env.CLUSTER_NAME }}
 
-          wait-for-service-stability: true
+          wait-for-service-stability: "true"
