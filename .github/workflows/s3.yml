@@ -87,7 +87,12 @@ jobs:
           # Push both the SHA tag and the latest tag
           docker push $REGISTRY/$REPO:$TAG
           docker push $REGISTRY/$REPO:latest
-
+          
+      - name: Set Image URI Output
+        id: set-output-uri
+        run: |
+          IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}"
+          echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
 
   deploy: 
     runs-on: ubuntu-latest
