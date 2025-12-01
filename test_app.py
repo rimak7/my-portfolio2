@@ -20,4 +20,4 @@ def test_homepage(client):
     
     # Check if a known phrase (like the title or a heading) is in the response body
     # NOTE: You may need to change "Welcome to my portfolio" to match content in index.html
-    assert b"Welcome to my portfolio" in response.data
+    assert b"Welcome to my project" in response.data
