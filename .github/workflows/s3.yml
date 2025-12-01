@@ -87,7 +87,7 @@ jobs:
           # Push both the SHA tag and the latest tag
           docker push $REGISTRY/$REPO:$TAG
           docker push $REGISTRY/$REPO:latest
-          
+
       - name: Set Image URI Output
         id: set-output-uri
         run: |
@@ -110,7 +110,7 @@ jobs:
         with:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}  # e.g., task-definition.json
           container-name: ${{ env.CONTAINER_NAME }}
-          image_uri: ${{ steps.build-and-push.outputs.image }} 
+          image_uri: ${{ steps.build-image.outputs.image }} 
 
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
