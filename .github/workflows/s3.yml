@@ -86,4 +86,4 @@ jobs:
           service: ${{ env.AWS_SERVICE_NAME}}
           cluster: ${{ env.AWS_CLUSTER_NAME }}
           container-name: ${{ env.AWS_CONTAINER_NAME }}
-          image: ${{ steps.login-ecr.outputs.registry }}/<YOUR_ECR_REPOSITORY_NAME>:${{ github.sha }}  
+          image: ${{ steps.login-ecr.outputs.registry }}/ ${{ env.ECR_REPOSITORY }}:${{ github.sha }}  
