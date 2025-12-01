@@ -80,7 +80,7 @@ jobs:
           docker push $REGISTRY/$REPO:latest
   deploy: 
     runs-on: ubuntu-latest
-    
+    needs: [build]
     steps:
       - name: Prepare the task definition
         id: task-def
