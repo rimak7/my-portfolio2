@@ -15,9 +15,10 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
   ECR_REPOSITORY: ${{ secrets.AWS_REPOSITORY }}
-  AWS_SERVICE_NAME: ${{ secrets.AWS_SERVICE_NAME }}
-  AWS_CLUSTER_NAME: ${{ secrets.AWS_CLUSTER_NAME}}
-  AWS_CONTAINER_NAME: ${{ secrets.AWS_CONTAINER_NAME}}
+  SERVICE_NAME: "training-task-service"
+  CLUSTER_NAME: "my-ecs-training"
+  CONTAINER_NAME: "training-app"
+  ECS_TASK_DEFINITION: "training-task.json"
 
 jobs:
   build:
@@ -68,9 +69,9 @@ jobs:
         env:
           ECR_REPOSITORY: ${{env.ECR_REPOSITORY}} # Define this as a separate ENV/Secret
         run: |
-          REGISTRY=${{ steps.login-ecr.outputs.registry }}
-          REPO=${{ env.ECR_REPOSITORY }}
-          TAG=${{ github.sha }}
+          REGISTRY= ${{ steps.login-ecr.outputs.registry }}
+          REPO= ${{ env.ECR_REPOSITORY }}
+          TAG= ${{ github.sha }}
 
           docker build -t $REGISTRY/$REPO:$TAG .
           docker tag $REGISTRY/$REPO:$TAG $REGISTRY/$REPO:latest
@@ -79,11 +80,19 @@ jobs:
           docker push $REGISTRY/$REPO:latest
 
 
-      - name: Deploy to Amazon ECS Service
-        uses: aws-actions/amazon-ecs-deploy@v1
+      - name: Prepare the task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: training-task.json # e.g., task-definition.json
-          service: ${{ env.AWS_SERVICE_NAME}}
-          cluster: ${{ env.AWS_CLUSTER_NAME }}
-          container-name: ${{ env.AWS_CONTAINER_NAME }}
-          image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}  
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}  # e.g., task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.IMAGE_URI}} 
+
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.SERVICE_NAME }}
+          cluster: ${{ env.CLUSTER_NAME }}
+
+          wait-for-service-stability: true
