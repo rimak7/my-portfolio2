@@ -63,7 +63,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Upload static files to S3 bucket
-      
+
         run: | 
           aws s3 sync . s3://${{ env.S3_BUCKET }}/ --delete
 
@@ -103,12 +103,12 @@ jobs:
       # Debug step to confirm the input value (Helpful for troubleshooting)
       - name: Debug - Check Image URI Value
         run: |
-         echo "Image URI from build job: ${{ needs.build.outputs.image_uri }}"
+          echo "Image URI from build job: ${{ needs.build.outputs.image_uri }}"
           
       # 1. Prepare the task definition using the image URI from the build job
       - name: Prepare the task definition
         id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        uses: aws-actions/amazon-ecs-render-task-definition@v2
         with:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}
           container-name: ${{ env.CONTAINER_NAME }}
@@ -117,7 +117,7 @@ jobs:
 
       # 2. Deploy to ECS
       - name: Deploy to ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.SERVICE_NAME }}
