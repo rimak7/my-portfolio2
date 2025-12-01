@@ -1,4 +1,4 @@
-name: Training cic
+name: Training cicd
 
 on:
   push:
@@ -93,6 +93,8 @@ jobs:
     needs: [build] 
     
     steps:
+      - name: checkout the code
+        uses: actions/checkout@v4
       # Configure AWS credentials in the deploy job
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
