@@ -64,31 +64,48 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-        
-      - name: Build, tag, and push image to ECR
-        env:
-          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }} # Define this as a separate ENV/Secret
-        run: |
-          REGISTRY= ${{ steps.login-ecr.outputs.registry }}
-          REPO= ${{ env.ECR_REPOSITORY }}
-          TAG= ${{ github.sha }}
 
+      
+      - name: Build image
+        run: |
+          # Use correct shell syntax for variable assignment (no spaces around '=')
+          REGISTRY="${{ steps.login-ecr.outputs.registry }}"
+          REPO="${{ env.ECR_REPOSITORY }}"
+          TAG="${{ github.sha }}"
+          
+          # Build with the commit SHA tag and tag again as 'latest'
           docker build -t $REGISTRY/$REPO:$TAG .
           docker tag $REGISTRY/$REPO:$TAG $REGISTRY/$REPO:latest
+
+    
+      - name: Push image to ECR
+        run: |
+          REGISTRY="${{ steps.login-ecr.outputs.registry }}"
+          REPO="${{ env.ECR_REPOSITORY }}"
+          TAG="${{ github.sha }}"
           
+          # Push both the SHA tag and the latest tag
           docker push $REGISTRY/$REPO:$TAG
           docker push $REGISTRY/$REPO:latest
+
+
   deploy: 
     runs-on: ubuntu-latest
     needs: [build]
     steps:
+      - name: configure AWS OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{secrets.AWS_OIDC_ROLE_ARN}}
+          aws-region: ${{env.AWS_REGION}}
+          
       - name: Prepare the task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}  # e.g., task-definition.json
           container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.IMAGE_URI}} 
+          image: ${{  needs.build.outputs.image_uri }} 
 
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
