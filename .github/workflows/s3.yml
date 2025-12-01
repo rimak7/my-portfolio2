@@ -72,11 +72,10 @@ jobs:
           REGISTRY="${{ steps.login-ecr.outputs.registry }}"
           REPO="${{ env.ECR_REPOSITORY }}"
           TAG="${{ github.sha }}"
-          
-          # Build with the commit SHA tag and tag again as 'latest'
+         run: | 
           docker build -t $REGISTRY/$REPO:$TAG .
           docker tag $REGISTRY/$REPO:$TAG $REGISTRY/$REPO:latest
-
+   
     
       - name: Push image to ECR
         run: |
@@ -87,7 +86,7 @@ jobs:
           # Push both the SHA tag and the latest tag
           docker push $REGISTRY/$REPO:$TAG
           docker push $REGISTRY/$REPO:latest
-
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
   deploy: 
     runs-on: ubuntu-latest
@@ -98,6 +97,7 @@ jobs:
         with:
           role-to-assume: ${{secrets.AWS_OIDC_ROLE_ARN}}
           aws-region: ${{env.AWS_REGION}}
+
       - name: Prepare the task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -113,4 +113,14 @@ jobs:
           service: ${{ env.SERVICE_NAME }}
           cluster: ${{ env.CLUSTER_NAME }}
 
-          wait-for-service-stability: true
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+  
+        with:
+
+        image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        wait-for-service-stability: true
