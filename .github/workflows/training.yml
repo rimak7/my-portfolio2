@@ -23,6 +23,9 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      image_uri: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -55,11 +58,10 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # - name: Upload static files to S3 bucket
-      #   run: |
-      #     aws s3 sync . s3://${{ env.S3_BUCKET }}/ --delete
+      - name: Upload static files to S3 bucket
+        run: |
+          aws s3 sync . s3://${{ env.S3_BUCKET }}/ --delete
 
-      
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -91,9 +93,9 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # - name: Debug - Check Image URI Value
-      #   run: |
-      #     echo "Image URI from build job: ${{ needs.build.outputs.image_uri }}"
+      - name: Debug - Check Image URI Value
+        run: |
+          echo "Image URI from build job: ${{ needs.build.outputs.image_uri }}"
 
       - name: Prepare the task definition
         id: task-def
@@ -109,4 +111,4 @@ jobs:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.SERVICE_NAME }}
           cluster: ${{ env.CLUSTER_NAME }}
-          # wait-for-service-stability: true
+          wait-for-service-stability: true
