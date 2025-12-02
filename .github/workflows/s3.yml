@@ -97,7 +97,8 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Debug - Check Image URI Value
-        run: echo "Image URI from build job: ${{ needs.build.outputs.image_uri }}"
+        run: |
+         echo "Image URI from build job: ${{ needs.build.outputs.image_uri }}"
 
       - name: Prepare the task definition
         id: task-def
@@ -113,4 +114,4 @@ jobs:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.SERVICE_NAME }}
           cluster: ${{ env.CLUSTER_NAME }}
-          wait-for-service-stability: true
+          wait-for-service-stability: "true"
