@@ -101,7 +101,7 @@ jobs:
         with:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}
           container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ needs.build.outputs.image_uri }}
+          image: ${{ steps.build-image.outputs.image }}
 
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
@@ -109,4 +109,4 @@ jobs:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.SERVICE_NAME }}
           cluster: ${{ env.CLUSTER_NAME }}
-          # wait-for-service-stability: true
+          wait-for-service-stability: true
