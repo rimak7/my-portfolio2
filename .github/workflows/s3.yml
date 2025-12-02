@@ -60,10 +60,9 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # If you want to upload static files to S3, uncomment this:
-      # - name: Upload static files to S3 bucket
-      #   run: |
-      #     aws s3 sync . s3://${{ env.S3_BUCKET }}/ --delete
+      - name: Upload static files to S3 bucket
+        run: |
+          aws s3 sync . s3://${{ env.S3_BUCKET }}/ --delete
 
       - name: Login to Amazon ECR
         id: login-ecr
