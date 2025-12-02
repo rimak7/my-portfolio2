@@ -24,10 +24,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # Make the built image URI available to other jobs
-    outputs:
-      image_uri: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -60,9 +56,10 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Upload static files to S3 bucket
-        run: |
-          aws s3 sync . s3://${{ env.S3_BUCKET }}/ --delete
+      # Optional
+      # - name: Upload static files to S3 bucket
+      #   run: |
+      #     aws s3 sync . s3://${{ env.S3_BUCKET }}/ --delete
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -95,17 +92,29 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      # We log in again just to get the registry URL in THIS job
+      - name: Login to Amazon ECR (for deploy)
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Compute image URI
+        id: image-uri
+        run: |
+          IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}"
+          echo "Using IMAGE_URI=$IMAGE_URI"
+          echo "uri=$IMAGE_URI" >> "$GITHUB_OUTPUT"
+
       - name: Debug - Check Image URI Value
         run: |
-         echo "Image URI from build job: ${{ needs.build.outputs.image_uri }}"
+         echo "Image URI from deploy job: ${{ steps.image-uri.outputs.uri }}"
 
       - name: Prepare the task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-            task-definition: ${{ env.ECS_TASK_DEFINITION }}
-            container-name: ${{ env.CONTAINER_NAME }}
-            image: ${{ needs.build.outputs.image_uri }}
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.image-uri.outputs.uri }}
 
       - name: Deploy to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
@@ -113,4 +122,4 @@ jobs:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.SERVICE_NAME }}
           cluster: ${{ env.CLUSTER_NAME }}
-          wait-for-service-stability: "true"
+          wait-for-service-stability: true
