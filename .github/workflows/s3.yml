@@ -1,4 +1,4 @@
-name: Training cic
+name: Training cicd
 
 on:
   push:
