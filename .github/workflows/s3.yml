@@ -14,7 +14,7 @@ env:
   PYTHON_VERSION: "3.11"
   AWS_REGION: ${{ secrets.AWS_REGION }}
   S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-  ECR_REPOSITORY: ${{ secrets.AWS_REPOSITORY }}   # e.g. "training-app" (repo NAME only)
+  ECR_REPOSITORY: ${{ secrets.AWS_REPOSITORY }}  
   SERVICE_NAME: "training-task-service"
   CLUSTER_NAME: "my-ecs-training"
   CONTAINER_NAME: "training-app"
@@ -56,10 +56,10 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # Optional
-      # - name: Upload static files to S3 bucket
-      #   run: |
-      #     aws s3 sync . s3://${{ env.S3_BUCKET }}/ --delete
+     
+      - name: Upload static files to S3 bucket
+        run: |
+          aws s3 sync . s3://${{ env.S3_BUCKET }}/ --delete
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -92,7 +92,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # We log in again just to get the registry URL in THIS job
+      
       - name: Login to Amazon ECR (for deploy)
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
