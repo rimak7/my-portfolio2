@@ -1,4 +1,4 @@
-name: Training cicd
+name: CI/CD PIPELINE
 
 on:
   push:
@@ -117,3 +117,4 @@ jobs:
           service: ${{ env.SERVICE_NAME }}
           cluster: ${{ env.CLUSTER_NAME }}
           wait-for-service-stability: "true"
+          
