@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [ "main"]
 permissions:
-  id-token: write          # Required for OIDC
+  id-token: write         
   contents: read
 
 env: 
@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
-            python-version: ${{env.python_version}}  # or $python_version
+            python-version: ${{env.python_version}} 
       - name: Install pytest
         run: pip install -r requirements.txt
       - name: unit test
