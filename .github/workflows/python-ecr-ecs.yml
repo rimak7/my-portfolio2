@@ -72,9 +72,9 @@ jobs:
       - name: Scan Docker image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.ECR_REPO }}:latest
+          image-ref: ${{ env.ECR_REPOSITORY }}:latest
           format: table
-          exit-code: '1' # fail workflow on critical/high vulnerabilities
+          exit-code: '1' 
           severity: CRITICAL,HIGH
 
 
