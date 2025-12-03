@@ -58,7 +58,7 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-        
+
       - name: Build and push image to ECR
         id: build-and-push
         uses: docker/build-push-action@v5
@@ -68,6 +68,15 @@ jobs:
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+
+      - name: Scan Docker image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.ECR_REPO }}:latest
+          format: table
+          exit-code: '1' # fail workflow on critical/high vulnerabilities
+          severity: CRITICAL,HIGH
+
 
   deploy:
     runs-on: ubuntu-latest
